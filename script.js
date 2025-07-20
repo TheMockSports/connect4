@@ -1,52 +1,118 @@
-const topTeams = ["Carlton", "Collingwood", "Geelong", "Richmond"];
-const sideTeams = ["Essendon", "Hawthorn", "Melbourne", "Sydney"];
-
-let currentPlayer = 1; // 1 = Red, 2 = Yellow
-
-const container = document.getElementById("grid-container");
+const menuScreen = document.getElementById("menu-screen");
+const gameScreen = document.getElementById("game-screen");
+const gridContainer = document.getElementById("grid-container");
 const turnIndicator = document.getElementById("turn-indicator");
+const winnerMessage = document.getElementById("winner-message");
 
-const rows = sideTeams.length + 1;
-const cols = topTeams.length + 1;
+let grid = [];
+let currentPlayer = "red";
+const ROWS = 7;
+const COLS = 7;
 
-container.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
+// Generate customizer inputs
+const topInputs = document.getElementById("top-inputs");
+const sideInputs = document.getElementById("side-inputs");
 
-// Build the grid
-for (let r = 0; r < rows; r++) {
-  for (let c = 0; c < cols; c++) {
-    const cell = document.createElement("div");
+for (let i = 0; i < COLS; i++) {
+  const input = document.createElement("input");
+  input.placeholder = `Top ${i + 1}`;
+  input.value = `Team${i + 1}`;
+  topInputs.appendChild(input);
+}
 
-    if (r === 0 && c === 0) {
-      cell.textContent = "";
-      cell.className = "label";
-    } else if (r === 0) {
-      cell.textContent = topTeams[c - 1];
-      cell.className = "label";
-    } else if (c === 0) {
-      cell.textContent = sideTeams[r - 1];
-      cell.className = "label";
-    } else {
+for (let i = 0; i < ROWS; i++) {
+  const input = document.createElement("input");
+  input.placeholder = `Side ${i + 1}`;
+  input.value = `Team${i + 1}`;
+  sideInputs.appendChild(input);
+}
+
+// Start game
+document.getElementById("start-btn").onclick = () => {
+  menuScreen.style.display = "none";
+  gameScreen.style.display = "block";
+  startGame();
+};
+
+document.getElementById("back-btn").onclick = () => {
+  gameScreen.style.display = "none";
+  menuScreen.style.display = "block";
+  winnerMessage.textContent = "";
+};
+
+document.getElementById("replay-btn").onclick = () => {
+  startGame();
+  winnerMessage.textContent = "";
+};
+
+// Main game setup
+function startGame() {
+  currentPlayer = "red";
+  turnIndicator.textContent = "Current Turn: 🔴 Red";
+  grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  gridContainer.innerHTML = "";
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement("div");
       cell.className = "cell";
-      cell.addEventListener("click", () => {
-        if (!cell.classList.contains("red") && !cell.classList.contains("yellow")) {
-          const confirmPlace = confirm("Confirm placing a token here?");
-          if (confirmPlace) {
-            if (currentPlayer === 1) {
-              cell.classList.add("red");
-              cell.textContent = "🔴";
-              currentPlayer = 2;
-              turnIndicator.textContent = "Current Turn: 🟡 Player 2";
-            } else {
-              cell.classList.add("yellow");
-              cell.textContent = "🟡";
-              currentPlayer = 1;
-              turnIndicator.textContent = "Current Turn: 🔴 Player 1";
-            }
-          }
-        }
-      });
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", handleCellClick);
+      gridContainer.appendChild(cell);
+    }
+  }
+}
+
+// Click handler
+function handleCellClick(e) {
+  const row = +e.target.dataset.row;
+  const col = +e.target.dataset.col;
+
+  if (grid[row][col] !== null || winnerMessage.textContent !== "") return;
+
+  grid[row][col] = currentPlayer;
+  e.target.classList.add(currentPlayer);
+  e.target.textContent = currentPlayer === "red" ? "🔴" : "🟡";
+
+  if (checkWinner(row, col)) {
+    winnerMessage.textContent = `${currentPlayer === "red" ? "🔴 Red" : "🟡 Yellow"} Wins!`;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "red" ? "yellow" : "red";
+  turnIndicator.textContent = `Current Turn: ${currentPlayer === "red" ? "🔴 Red" : "🟡 Yellow"}`;
+}
+
+// Winner checking
+function checkWinner(row, col) {
+  const directions = [
+    [[0, 1], [0, -1]],       // horizontal
+    [[1, 0], [-1, 0]],       // vertical
+    [[1, 1], [-1, -1]],      // diagonal down-right
+    [[1, -1], [-1, 1]]       // diagonal up-right
+  ];
+
+  for (let dir of directions) {
+    let count = 1;
+
+    for (let [dr, dc] of dir) {
+      let r = row + dr;
+      let c = col + dc;
+
+      while (
+        r >= 0 && r < ROWS &&
+        c >= 0 && c < COLS &&
+        grid[r][c] === currentPlayer
+      ) {
+        count++;
+        r += dr;
+        c += dc;
+      }
     }
 
-    container.appendChild(cell);
+    if (count >= 4) return true;
   }
+
+  return false;
 }
