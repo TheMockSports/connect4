@@ -1,39 +1,41 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Custom Connect 4 Game with Image Uploads"
-    />
-    <title>Connect 4 Custom Grid Game</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect 4 Custom Grid Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="main-menu">
+    <h1>Connect 4</h1>
+    <label for="grid-size">Select Grid Size:</label>
+    <select id="grid-size">
+      <option value="5">5x5</option>
+      <option value="6">6x6</option>
+      <option value="7" selected>7x7</option>
+      <option value="8">8x8</option>
+      <option value="9">9x9</option>
+      <option value="10">10x10</option>
+    </select>
+    <button onclick="createCustomizationGrid()">Customize Grid</button>
+  </div>
 
-    <!-- Fonts & Styling (Optional, you can add your own) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
-      }
+  <div id="customization-screen" class="hidden">
+    <h2>Customize Your Grid</h2>
+    <div id="custom-grid"></div>
+    <button onclick="startGame()">Play Game</button>
+  </div>
 
-      #root {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-    </style>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-  </body>
+  <div id="game-screen" class="hidden">
+    <h2 id="turn-indicator">Red's Turn</h2>
+    <div id="game-grid"></div>
+    <p id="winner-message"></p>
+    <button onclick="resetGame()">Replay</button>
+    <button onclick="goToMainMenu()">Main Menu</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
