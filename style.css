@@ -86,7 +86,9 @@ input[type="text"], input[type="file"], button, select {
 
 .winning {
   outline: 4px solid gold;
-  box-shadow: 0 0 10px yellow;
+  box-shadow: 0 0 12px 4px yellow;
+}
+
 }
 
 img.uploaded {
