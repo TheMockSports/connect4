@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MockSports Connect 4</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <img src="mocksports-logo.png" alt="MockSports Logo" id="logo" />
+  </header>
+
+  <div id="main-menu" class="center">
+    <label for="grid-size">Select Grid Size:</label>
+    <select id="grid-size">
+      <option value="5">5x5</option>
+      <option value="6">6x6</option>
+      <option value="7" selected>7x7</option>
+      <option value="8">8x8</option>
+      <option value="9">9x9</option>
+      <option value="10">10x10</option>
+    </select>
+    <button onclick="showCustomization()">Customize</button>
+  </div>
+
+  <div id="customization-screen" class="hidden center">
+    <h2>Customize Your Grid</h2>
+    <div id="custom-grid" class="grid"></div>
+    <button onclick="startGame()">Play Game</button>
+    <button onclick="goToMenu()">Return to Menu</button>
+  </div>
+
+  <div id="game-screen" class="hidden center">
+    <h2 id="turn-indicator">Red Team's Turn</h2>
+    <div id="game-board" class="grid"></div>
+    <h2 id="winner-message"></h2>
+    <button onclick="replayGame()">Replay</button>
+    <button onclick="goToMenu()">Return to Menu</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
