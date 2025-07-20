@@ -1,145 +1,129 @@
 let gridSize = 7;
 let gridData = [];
 let currentPlayer = 'red';
-let gameBoard = [];
-let isGameActive = true;
+let boardState = [];
 
 function createCustomGrid() {
   gridSize = parseInt(document.getElementById('grid-size').value);
-  gridData = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+  gridData = Array(gridSize).fill().map(() => Array(gridSize).fill({text: '', image: ''}));
+  const grid = document.getElementById('custom-grid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${gridSize + 1}, 60px)`;
+  grid.style.gridTemplateRows = `repeat(${gridSize + 1}, 60px)`;
 
-  const container = document.getElementById('custom-grid');
-  container.innerHTML = '';
-  container.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+  for (let row = 0; row <= gridSize; row++) {
+    for (let col = 0; col <= gridSize; col++) {
+      const cell = document.createElement('div');
+      cell.classList.add('custom-cell');
 
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const div = document.createElement('div');
-      div.className = 'cell';
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Text or Image URL';
-      div.appendChild(input);
-      container.appendChild(div);
-    }
-  }
+      if (row === 0 && col === 0) {
+        cell.innerHTML = '';
+      } else if (row === 0 || col === 0) {
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.placeholder = 'Text';
+        textInput.onchange = () => {
+          if (row === 0) gridData[0][col-1].text = textInput.value;
+          if (col === 0) gridData[row-1][0].text = textInput.value;
+        };
 
-  container.classList.remove('hidden');
-  document.getElementById('start-game-btn').classList.remove('hidden');
-}
+        const imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.accept = 'image/*';
+        imageInput.onchange = (e) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            if (row === 0) gridData[0][col-1].image = event.target.result;
+            if (col === 0) gridData[row-1][0].image = event.target.result;
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        };
 
-function startGame() {
-  const inputs = document.querySelectorAll('#custom-grid input');
-  let index = 0;
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const val = inputs[index++].value;
-      if (val.match(/\.(jpeg|jpg|gif|png)$/)) {
-        gridData[row][col] = { type: 'img', content: val };
-      } else {
-        gridData[row][col] = { type: 'text', content: val };
-      }
-    }
-  }
-  renderGameBoard();
-}
-
-function renderGameBoard() {
-  const board = document.getElementById('game-board');
-  board.innerHTML = '';
-  board.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
-  gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const div = document.createElement('div');
-      div.className = 'cell';
-      div.dataset.row = row;
-      div.dataset.col = col;
-      div.onclick = () => placeToken(col);
-
-      const cellData = gridData[row][col];
-      if (cellData) {
-        if (cellData.type === 'img') {
-          const img = document.createElement('img');
-          img.src = cellData.content;
-          div.appendChild(img);
-        } else {
-          div.textContent = cellData.content;
-        }
+        const container = document.createElement('div');
+        container.appendChild(textInput);
+        container.appendChild(imageInput);
+        cell.appendChild(container);
       }
 
-      board.appendChild(div);
+      grid.appendChild(cell);
     }
   }
 
   document.getElementById('main-menu').classList.add('hidden');
-  document.getElementById('custom-grid').classList.add('hidden');
-  document.getElementById('start-game-btn').classList.add('hidden');
-  document.getElementById('game-board').classList.remove('hidden');
-  document.getElementById('game-status').classList.remove('hidden');
-  document.getElementById('replay-btn').classList.remove('hidden');
-  document.getElementById('main-menu-btn').classList.remove('hidden');
-  updateGameStatus();
+  document.getElementById('customization-screen').classList.remove('hidden');
 }
 
-function placeToken(col) {
-  if (!isGameActive) return;
-  for (let row = gridSize - 1; row >= 0; row--) {
-    if (!gameBoard[row][col]) {
-      gameBoard[row][col] = currentPlayer;
-      const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
-      const token = document.createElement('div');
-      token.className = `token ${currentPlayer}`;
-      cell.appendChild(token);
+function startGame() {
+  document.getElementById('customization-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('turn-indicator').innerText = "Red's Turn";
+  currentPlayer = 'red';
+  boardState = Array(gridSize).fill().map(() => Array(gridSize).fill(null));
 
-      if (checkWin(row, col)) {
-        document.getElementById('game-status').innerText = `${currentPlayer.toUpperCase()} team wins!`;
-        isGameActive = false;
-        return;
-      }
+  const board = document.getElementById('game-board');
+  board.innerHTML = '';
+  board.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
 
-      currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
-      updateGameStatus();
-      return;
+  for (let row = 0; row < gridSize; row++) {
+    for (let col = 0; col < gridSize; col++) {
+      const cell = document.createElement('div');
+      cell.classList.add('grid-cell');
+      cell.onclick = () => placeToken(row, col, cell);
+      board.appendChild(cell);
     }
   }
 }
 
-function updateGameStatus() {
-  if (isGameActive) {
-    document.getElementById('game-status').innerText = `${currentPlayer.toUpperCase()}'s turn`;
+function placeToken(row, col, cell) {
+  if (boardState[row][col] !== null) return;
+
+  const token = document.createElement('div');
+  token.classList.add(currentPlayer === 'red' ? 'token-red' : 'token-yellow');
+  cell.appendChild(token);
+  boardState[row][col] = currentPlayer;
+
+  if (checkWinner(row, col)) {
+    document.getElementById('game-result').innerText = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} Wins!`;
+    return;
   }
+
+  currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+  document.getElementById('turn-indicator').innerText = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn`;
 }
 
-function checkWin(row, col) {
-  return (
-    checkDirection(row, col, 0, 1) + checkDirection(row, col, 0, -1) >= 3 ||
-    checkDirection(row, col, 1, 0) + checkDirection(row, col, -1, 0) >= 3 ||
-    checkDirection(row, col, 1, 1) + checkDirection(row, col, -1, -1) >= 3 ||
-    checkDirection(row, col, 1, -1) + checkDirection(row, col, -1, 1) >= 3
-  );
+function checkWinner(row, col) {
+  const directions = [
+    [[0,1],[0,-1]], [[1,0],[-1,0]], [[1,1],[-1,-1]], [[1,-1],[-1,1]]
+  ];
+
+  for (const [[dx1,dy1],[dx2,dy2]] of directions) {
+    let count = 1;
+    count += countTokens(row, col, dx1, dy1);
+    count += countTokens(row, col, dx2, dy2);
+    if (count >= 4) return true;
+  }
+  return false;
 }
 
-function checkDirection(row, col, dRow, dCol) {
+function countTokens(row, col, dx, dy) {
   let count = 0;
-  let r = row + dRow;
-  let c = col + dCol;
-  while (r >= 0 && r < gridSize && c >= 0 && c < gridSize && gameBoard[r][c] === currentPlayer) {
+  let r = row + dx;
+  let c = col + dy;
+  while (r >= 0 && c >= 0 && r < gridSize && c < gridSize && boardState[r][c] === currentPlayer) {
     count++;
-    r += dRow;
-    c += dCol;
+    r += dx;
+    c += dy;
   }
   return count;
 }
 
 function replayGame() {
-  renderGameBoard();
-  isGameActive = true;
-  currentPlayer = 'red';
-  updateGameStatus();
+  startGame();
+  document.getElementById('game-result').innerText = '';
 }
 
-function goToMainMenu() {
-  location.reload();
+function backToMenu() {
+  document.getElementById('main-menu').classList.remove('hidden');
+  document.getElementById('customization-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.add('hidden');
 }
