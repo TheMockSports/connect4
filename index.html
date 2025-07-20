@@ -7,9 +7,30 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Trivia Connect4</h1>
-  <p id="turn-indicator">Current Turn: 🔴 Player 1</p>
-  <div id="grid-container"></div>
+  <!-- Main Menu -->
+  <div id="menu-screen">
+    <h1>Customize Your 7x7 Trivia Grid</h1>
+    <div class="grid-customizer">
+      <div>
+        <p>Top Row Teams</p>
+        <div id="top-inputs"></div>
+      </div>
+      <div>
+        <p>Side Column Teams</p>
+        <div id="side-inputs"></div>
+      </div>
+    </div>
+    <button id="start-btn">Play Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" style="display:none;">
+    <h2 id="turn-indicator">Current Turn: 🔴 Red</h2>
+    <div id="grid-container"></div>
+    <div id="winner-message"></div>
+    <button id="replay-btn">Replay</button>
+    <button id="back-btn">Back to Menu</button>
+  </div>
 
   <script src="script.js"></script>
 </body>
