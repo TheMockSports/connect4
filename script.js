@@ -1,4 +1,3 @@
-
 let gridSize = 7;
 let currentPlayer = "red";
 let board = [];
@@ -42,7 +41,6 @@ function showCustomization() {
     wrapper.appendChild(cell);
   }
 
-  // Restore from saved grid
   if (savedCustomGrid) {
     document.getElementById("custom-grid-wrapper").innerHTML = savedCustomGrid;
   }
@@ -155,24 +153,42 @@ function checkWinner(row, col) {
   ];
 
   for (let [dx, dy] of directions) {
-    let count = 1;
-    count += countDirection(row, col, dx, dy);
-    count += countDirection(row, col, -dx, -dy);
-    if (count >= 4) return true;
+    let cells = [[row, col]];
+    cells = cells.concat(findDirection(row, col, dx, dy));
+    cells = cells.concat(findDirection(row, col, -dx, -dy));
+    if (cells.length >= 4) {
+      highlightWinningCells(cells);
+      return true;
+    }
   }
   return false;
 }
 
-function countDirection(row, col, dx, dy) {
-  let count = 0;
+function findDirection(row, col, dx, dy) {
+  let cells = [];
   let r = row + dx;
   let c = col + dy;
-  while (r >= 0 && c >= 0 && r < gridSize && c < gridSize && board[r][c] === currentPlayer) {
-    count++;
+  while (
+    r >= 0 && r < gridSize &&
+    c >= 0 && c < gridSize &&
+    board[r][c] === currentPlayer
+  ) {
+    cells.push([r, c]);
     r += dx;
     c += dy;
   }
-  return count;
+  return cells;
+}
+
+function highlightWinningCells(cells) {
+  const gameBoard = document.getElementById("game-board").children;
+  cells.forEach(([r, c]) => {
+    const index = r * gridSize + c;
+    const cell = gameBoard[index];
+    if (cell) {
+      cell.classList.add("winning");
+    }
+  });
 }
 
 function showWin() {
