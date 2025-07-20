@@ -1,0 +1,38 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 2rem;
+}
+
+#grid-container {
+  display: inline-grid;
+  gap: 5px;
+  margin-top: 20px;
+  border: 2px solid #000;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.cell.filled {
+  background-color: #4caf50;
+  color: white;
+}
+
+.label {
+  background-color: #cccccc;
+  border-radius: 0;
+  font-weight: bold;
+  font-size: 14px;
+}
