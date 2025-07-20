@@ -1,73 +1,56 @@
 body {
   font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f2f2f2;
   margin: 0;
   padding: 20px;
+  background: #f0f0f0;
+  text-align: center;
 }
 
-h1, h2, h3 {
-  color: #333;
-}
-
-#main-menu,
-#customization-screen,
-#game-screen {
+.centered {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
 }
 
-select, button {
-  padding: 10px;
-  font-size: 16px;
-  margin: 10px;
+.hidden {
+  display: none;
 }
 
-#grid-customization, #connect4-grid {
+#custom-grid, #game-grid {
   display: grid;
-  margin: 20px auto;
-  gap: 4px;
+  gap: 2px;
+  margin: 20px 0;
 }
 
-input[type="text"] {
-  width: 100px;
-}
-
-.cell {
+.grid-cell, .game-cell {
   width: 60px;
   height: 60px;
-  background-color: white;
   border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  background: white;
+  position: relative;
 }
 
-.cell img {
+.grid-label input, .grid-label input[type="file"] {
+  width: 100%;
+}
+
+.token {
+  border-radius: 50%;
   width: 100%;
   height: 100%;
-  object-fit: contain;
 }
 
 .token.red {
   background-color: red;
-  border-radius: 50%;
-  width: 90%;
-  height: 90%;
 }
 
 .token.yellow {
   background-color: yellow;
-  border-radius: 50%;
-  width: 90%;
-  height: 90%;
 }
 
-input[type=\"file\"] {
-  width: 60px;
+img.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
