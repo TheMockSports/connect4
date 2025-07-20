@@ -1,49 +1,49 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  background: #f7f7f7;
+  background-color: #f0f0f0;
   margin: 0;
   padding: 2rem;
 }
 
-#turn-indicator {
-  font-size: 18px;
-  margin-bottom: 1rem;
+.grid-customizer {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+#top-inputs input, #side-inputs input {
+  display: block;
+  margin: 5px;
+  padding: 5px;
 }
 
 #grid-container {
-  display: inline-grid;
+  display: grid;
+  grid-template-columns: repeat(7, 60px);
   gap: 5px;
-  margin-top: 20px;
-  border: 2px solid #000;
+  justify-content: center;
+  margin: 20px auto;
 }
 
 .cell {
   width: 60px;
   height: 60px;
-  background-color: #e0e0e0;
+  background-color: #ddd;
   border-radius: 50%;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   font-size: 24px;
-  transition: background-color 0.2s ease;
 }
 
-.cell.red {
-  background-color: red;
-  color: white;
-}
+.red { background-color: red; color: white; }
+.yellow { background-color: gold; color: black; }
 
-.cell.yellow {
-  background-color: gold;
-  color: black;
-}
-
-.label {
-  background-color: #cccccc;
-  border-radius: 0;
+#winner-message {
+  font-size: 24px;
+  margin: 20px;
   font-weight: bold;
-  font-size: 14px;
 }
