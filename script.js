@@ -1,153 +1,157 @@
 let gridSize = 7;
 let currentPlayer = 'red';
-let board = [];
-let headers = {
-  top: [],
-  left: []
-};
+let gameData = [];
+let topLabels = [];
+let leftLabels = [];
 
-function createCustomizationGrid() {
-  document.getElementById("main-menu").style.display = "none";
-  document.getElementById("customization-screen").style.display = "block";
+function $(id) {
+  return document.getElementById(id);
+}
 
-  gridSize = parseInt(document.getElementById("grid-size").value);
-  const container = document.getElementById("grid-customization");
-  container.innerHTML = "";
-  container.style.gridTemplateColumns = `repeat(${gridSize + 1}, 70px)`;
+function startCustomization() {
+  gridSize = parseInt($('grid-size').value);
+  $('main-menu').classList.add('hidden');
+  $('customization').classList.remove('hidden');
 
-  for (let row = 0; row <= gridSize; row++) {
-    for (let col = 0; col <= gridSize; col++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
+  const grid = $('custom-grid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `100px repeat(${gridSize}, 100px)`;
+  grid.style.gridTemplateRows = `repeat(${gridSize + 1}, 100px)`;
 
-      if (row === 0 && col === 0) {
-        cell.innerText = "";
-      } else if (row === 0 || col === 0) {
-        const textInput = document.createElement("input");
-        textInput.type = "text";
-        textInput.placeholder = "Text";
+  topLabels = [];
+  leftLabels = [];
 
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "image/*";
+  // First row (empty + top labels)
+  grid.appendChild(document.createElement('div')); // top-left corner empty
+  for (let c = 0; c < gridSize; c++) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell grid-label';
+    const input = document.createElement('input');
+    input.placeholder = 'Text or image';
+    const file = document.createElement('input');
+    file.type = 'file';
+    file.accept = 'image/*';
+    file.onchange = (e) => previewImage(e, cell);
+    cell.appendChild(input);
+    cell.appendChild(file);
+    grid.appendChild(cell);
+    topLabels.push({ textInput: input, fileInput: file });
+  }
 
-        fileInput.addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            cell.innerHTML = '';
-            cell.appendChild(img);
-          }
-        });
+  // Rows (left labels + blanks)
+  for (let r = 0; r < gridSize; r++) {
+    const labelCell = document.createElement('div');
+    labelCell.className = 'grid-cell grid-label';
+    const input = document.createElement('input');
+    input.placeholder = 'Text or image';
+    const file = document.createElement('input');
+    file.type = 'file';
+    file.accept = 'image/*';
+    file.onchange = (e) => previewImage(e, labelCell);
+    labelCell.appendChild(input);
+    labelCell.appendChild(file);
+    grid.appendChild(labelCell);
+    leftLabels.push({ textInput: input, fileInput: file });
 
-        const inputWrapper = document.createElement("div");
-        inputWrapper.style.display = "flex";
-        inputWrapper.style.flexDirection = "column";
-        inputWrapper.appendChild(textInput);
-        inputWrapper.appendChild(fileInput);
-
-        cell.appendChild(inputWrapper);
-
-        if (row === 0) headers.top[col - 1] = { text: "", image: null };
-        if (col === 0) headers.left[row - 1] = { text: "", image: null };
-      }
-
-      container.appendChild(cell);
+    for (let c = 0; c < gridSize; c++) {
+      const blank = document.createElement('div');
+      blank.className = 'grid-cell';
+      grid.appendChild(blank);
     }
+  }
+}
+
+function previewImage(event, container) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      container.innerHTML = `<img src="${e.target.result}" class="thumb"/>`;
+    };
+    reader.readAsDataURL(file);
   }
 }
 
 function startGame() {
-  document.getElementById("customization-screen").style.display = "none";
-  document.getElementById("game-screen").style.display = "block";
-  board = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-  renderGameGrid();
-}
+  $('customization').classList.add('hidden');
+  $('game').classList.remove('hidden');
 
-function renderGameGrid() {
-  const container = document.getElementById("connect4-grid");
-  container.innerHTML = "";
-  container.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+  $('turn-indicator').innerText = "Red's Turn";
+  currentPlayer = 'red';
+  gameData = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
 
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = row;
-      cell.dataset.col = col;
-      cell.addEventListener("click", () => placeToken(col));
-      container.appendChild(cell);
+  const grid = $('game-grid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'game-cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener('click', () => placeToken(r, c, cell));
+      grid.appendChild(cell);
     }
   }
 }
 
-function placeToken(col) {
-  for (let row = gridSize - 1; row >= 0; row--) {
-    if (!board[row][col]) {
-      board[row][col] = currentPlayer;
-      updateCell(row, col);
-      if (checkWin(row, col)) {
-        document.getElementById("winner-message").innerText = `${currentPlayer.toUpperCase()} wins!`;
-        disableBoard();
-      } else {
-        currentPlayer = currentPlayer === "red" ? "yellow" : "red";
-        document.getElementById("turn-indicator").innerText = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn`;
-      }
-      break;
-    }
+function placeToken(row, col, cell) {
+  if (gameData[row][col]) return;
+
+  gameData[row][col] = currentPlayer;
+
+  const token = document.createElement('div');
+  token.className = `token ${currentPlayer}`;
+  cell.appendChild(token);
+
+  if (checkWin(row, col)) {
+    $('result').innerText = `${capitalize(currentPlayer)} Wins!`;
+    document.querySelectorAll('.game-cell').forEach(cell => cell.removeEventListener('click', () => {}));
+    return;
   }
+
+  currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+  $('turn-indicator').innerText = `${capitalize(currentPlayer)}'s Turn`;
 }
 
-function updateCell(row, col) {
-  const cells = document.querySelectorAll("#connect4-grid .cell");
-  const index = row * gridSize + col;
-  const token = document.createElement("div");
-  token.classList.add("token", currentPlayer);
-  cells[index].appendChild(token);
+function checkWin(r, c) {
+  const directions = [
+    [0, 1], [1, 0], [1, 1], [1, -1]
+  ];
+  for (let [dr, dc] of directions) {
+    let count = 1;
+    count += countDirection(r, c, dr, dc);
+    count += countDirection(r, c, -dr, -dc);
+    if (count >= 4) return true;
+  }
+  return false;
 }
 
-function checkWin(row, col) {
-  return checkDirection(row, col, 1, 0) ||
-         checkDirection(row, col, 0, 1) ||
-         checkDirection(row, col, 1, 1) ||
-         checkDirection(row, col, 1, -1);
-}
-
-function checkDirection(row, col, rowDir, colDir) {
-  let count = 1;
-  count += countTokens(row, col, rowDir, colDir);
-  count += countTokens(row, col, -rowDir, -colDir);
-  return count >= 4;
-}
-
-function countTokens(row, col, rowDir, colDir) {
-  let r = row + rowDir;
-  let c = col + colDir;
+function countDirection(r, c, dr, dc) {
   let count = 0;
-  while (r >= 0 && r < gridSize && c >= 0 && c < gridSize && board[r][c] === currentPlayer) {
+  let i = 1;
+  while (true) {
+    const nr = r + dr * i;
+    const nc = c + dc * i;
+    if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize || gameData[nr][nc] !== currentPlayer) break;
     count++;
-    r += rowDir;
-    c += colDir;
+    i++;
   }
   return count;
 }
 
-function disableBoard() {
-  const cells = document.querySelectorAll("#connect4-grid .cell");
-  cells.forEach(cell => cell.removeEventListener("click", () => {}));
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function replayGame() {
-  currentPlayer = "red";
-  document.getElementById("winner-message").innerText = "";
-  renderGameGrid();
-  board = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-  document.getElementById("turn-indicator").innerText = "Red's Turn";
+function restartGame() {
+  startGame();
+  $('result').innerText = '';
 }
 
-function goBackToMainMenu() {
-  document.getElementById("main-menu").style.display = "block";
-  document.getElementById("customization-screen").style.display = "none";
-  document.getElementById("game-screen").style.display = "none";
+function goToMenu() {
+  $('main-menu').classList.remove('hidden');
+  $('customization').classList.add('hidden');
+  $('game').classList.add('hidden');
 }
