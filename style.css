@@ -1,49 +1,118 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f0f0f0;
-  margin: 0;
-  padding: 2rem;
+const menuScreen = document.getElementById("menu-screen");
+const gameScreen = document.getElementById("game-screen");
+const gridContainer = document.getElementById("grid-container");
+const turnIndicator = document.getElementById("turn-indicator");
+const winnerMessage = document.getElementById("winner-message");
+
+let grid = [];
+let currentPlayer = "red";
+const ROWS = 7;
+const COLS = 7;
+
+// Generate customizer inputs
+const topInputs = document.getElementById("top-inputs");
+const sideInputs = document.getElementById("side-inputs");
+
+for (let i = 0; i < COLS; i++) {
+  const input = document.createElement("input");
+  input.placeholder = `Top ${i + 1}`;
+  input.value = `Team${i + 1}`;
+  topInputs.appendChild(input);
 }
 
-.grid-customizer {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  margin-bottom: 2rem;
+for (let i = 0; i < ROWS; i++) {
+  const input = document.createElement("input");
+  input.placeholder = `Side ${i + 1}`;
+  input.value = `Team${i + 1}`;
+  sideInputs.appendChild(input);
 }
 
-#top-inputs input, #side-inputs input {
-  display: block;
-  margin: 5px;
-  padding: 5px;
+// Start game
+document.getElementById("start-btn").onclick = () => {
+  menuScreen.style.display = "none";
+  gameScreen.style.display = "block";
+  startGame();
+};
+
+document.getElementById("back-btn").onclick = () => {
+  gameScreen.style.display = "none";
+  menuScreen.style.display = "block";
+  winnerMessage.textContent = "";
+};
+
+document.getElementById("replay-btn").onclick = () => {
+  startGame();
+  winnerMessage.textContent = "";
+};
+
+// Main game setup
+function startGame() {
+  currentPlayer = "red";
+  turnIndicator.textContent = "Current Turn: 🔴 Red";
+  grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  gridContainer.innerHTML = "";
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", handleCellClick);
+      gridContainer.appendChild(cell);
+    }
+  }
 }
 
-#grid-container {
-  display: grid;
-  grid-template-columns: repeat(7, 60px);
-  gap: 5px;
-  justify-content: center;
-  margin: 20px auto;
+// Click handler
+function handleCellClick(e) {
+  const row = +e.target.dataset.row;
+  const col = +e.target.dataset.col;
+
+  if (grid[row][col] !== null || winnerMessage.textContent !== "") return;
+
+  grid[row][col] = currentPlayer;
+  e.target.classList.add(currentPlayer);
+  e.target.textContent = currentPlayer === "red" ? "🔴" : "🟡";
+
+  if (checkWinner(row, col)) {
+    winnerMessage.textContent = `${currentPlayer === "red" ? "🔴 Red" : "🟡 Yellow"} Wins!`;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "red" ? "yellow" : "red";
+  turnIndicator.textContent = `Current Turn: ${currentPlayer === "red" ? "🔴 Red" : "🟡 Yellow"}`;
 }
 
-.cell {
-  width: 60px;
-  height: 60px;
-  background-color: #ddd;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
+// Winner checking
+function checkWinner(row, col) {
+  const directions = [
+    [[0, 1], [0, -1]],       // horizontal
+    [[1, 0], [-1, 0]],       // vertical
+    [[1, 1], [-1, -1]],      // diagonal down-right
+    [[1, -1], [-1, 1]]       // diagonal up-right
+  ];
 
-.red { background-color: red; color: white; }
-.yellow { background-color: gold; color: black; }
+  for (let dir of directions) {
+    let count = 1;
 
-#winner-message {
-  font-size: 24px;
-  margin: 20px;
-  font-weight: bold;
+    for (let [dr, dc] of dir) {
+      let r = row + dr;
+      let c = col + dc;
+
+      while (
+        r >= 0 && r < ROWS &&
+        c >= 0 && c < COLS &&
+        grid[r][c] === currentPlayer
+      ) {
+        count++;
+        r += dr;
+        c += dc;
+      }
+    }
+
+    if (count >= 4) return true;
+  }
+
+  return false;
 }
