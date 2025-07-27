@@ -48,9 +48,22 @@ function showCustomization() {for (let row = 0; row < gridSize; row++) {
       });
 
       cell.appendChild(input);
-      cell.appendChild(file);
-      cell.appendChild(selector);
-      cell.appendChild(randomBtn);
+cell.appendChild(file);
+cell.appendChild(selector);
+
+// 🆕 Add randomize button
+const randomBtn = document.createElement("button");
+randomBtn.textContent = "🎲 Random";
+randomBtn.type = "button";
+randomBtn.style.fontSize = "10px";
+randomBtn.addEventListener("click", () => {
+  const randomClub = aflClubs[Math.floor(Math.random() * aflClubs.length)];
+  selector.value = `logos/${randomClub}.png`;
+  input.value = "";
+  file.value = "";
+});
+cell.appendChild(randomBtn);
+
     } else {
       // Empty cell for the game board — no customization
       cell.classList.add("non-editable");
