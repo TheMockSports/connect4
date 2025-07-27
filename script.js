@@ -8,37 +8,58 @@ let timerPaused = false;
 let enableTimer = false;
 let savedCustomGrid = null;
 
-function showCustomization() {
-  gridSize = parseInt(document.getElementById("grid-size").value);
-  timerLength = parseInt(document.getElementById("timer-length").value);
-  enableTimer = document.getElementById("enable-timer").checked;
-
-  board = [];
-  lockCells = [];
-
-  document.getElementById("main-menu").classList.add("hidden");
-  document.getElementById("customization-screen").classList.remove("hidden");
-
-  const wrapper = document.getElementById("custom-grid-wrapper");
-  wrapper.innerHTML = "";
-  wrapper.style.gridTemplateColumns = `repeat(${gridSize}, auto)`;
-  wrapper.style.display = "grid";
-
-  for (let i = 0; i < gridSize * gridSize; i++) {
+function showCustomization() {for (let row = 0; row < gridSize; row++) {
+  for (let col = 0; col < gridSize; col++) {
     const cell = document.createElement("div");
     cell.classList.add("custom-cell-wrapper");
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Text";
+    if (row === 0 || col === 0) {
+      // These cells are customizable
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Text";
 
-    const file = document.createElement("input");
-    file.type = "file";
-    file.accept = "image/*";
+      const file = document.createElement("input");
+      file.type = "file";
+      file.accept = "image/*";
 
-    cell.appendChild(input);
-    cell.appendChild(file);
+      const selector = document.createElement("select");
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.text = "Choose AFL Club";
+      selector.appendChild(defaultOption);
+
+      aflClubs.forEach(club => {
+        const option = document.createElement("option");
+        option.value = `logos/${club}.png`;
+        option.text = club.charAt(0).toUpperCase() + club.slice(1);
+        selector.appendChild(option);
+      });
+
+      const randomBtn = document.createElement("button");
+      randomBtn.textContent = "🎲 Random";
+      randomBtn.type = "button";
+      randomBtn.style.fontSize = "10px";
+      randomBtn.addEventListener("click", () => {
+        const randomClub = aflClubs[Math.floor(Math.random() * aflClubs.length)];
+        selector.value = `logos/${randomClub}.png`;
+        input.value = "";
+        file.value = "";
+      });
+
+      cell.appendChild(input);
+      cell.appendChild(file);
+      cell.appendChild(selector);
+      cell.appendChild(randomBtn);
+    } else {
+      // Empty cell for the game board — no customization
+      cell.classList.add("non-editable");
+    }
+
     wrapper.appendChild(cell);
+  }
+}
+
   }
 
   if (savedCustomGrid) {
